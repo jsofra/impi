@@ -1,8 +1,8 @@
 (ns impi.core
-  (:require cljsjs.pixi))
+  (:require ["pixi.js" :as PIXI]))
 
 (defn- update-count [child f]
-  (set! (.-impiCount child) (f (.-impiCount child))))
+  (goog.object/set child "impiCount" (f (goog.object/get child "impiCount"))))
 
 (defn- replace-child [container child i]
   (let [old-child (aget (.-children container) i)]
@@ -41,7 +41,7 @@
   (js-delete child "impiCount"))
 
 (defn- clear-parent [child]
-  (when (zero? (.-impiCount child))
+  (when (zero? (goog.object/get child "impiCount"))
     (set-parent child nil)))
 
 (defn- replace-children [container children]
@@ -63,7 +63,7 @@
       (.on event #(apply listener % args)))))
 
 (defn- rectangle [[x y w h]]
-  (js/PIXI.Rectangle. x y w h))
+  (PIXI/Rectangle. x y w h))
 
 (defn- image [src]
   (let [image (js/Image.)]
@@ -71,14 +71,14 @@
     image))
 
 (def ^:private scale-modes
-  {:pixi.texture.scale-mode/linear  js/PIXI.SCALE_MODES.LINEAR
-   :pixi.texture.scale-mode/nearest js/PIXI.SCALE_MODES.NEAREST})
+  {:pixi.texture.scale-mode/linear  PIXI/SCALE_MODES.LINEAR
+   :pixi.texture.scale-mode/nearest PIXI/SCALE_MODES.NEAREST})
 
 (def ^:private blend-modes
-  {:pixi.object.blend-mode/normal   js/PIXI.BLEND_MODES.NORMAL
-   :pixi.object.blend-mode/add      js/PIXI.BLEND_MODES.ADD
-   :pixi.object.blend-mode/multiply js/PIXI.BLEND_MODES.MULTIPLY
-   :pixi.object.blend-mode/screen   js/PIXI.BLEND_MODES.SCREEN})
+  {:pixi.object.blend-mode/normal   PIXI/BLEND_MODES.NORMAL
+   :pixi.object.blend-mode/add      PIXI/BLEND_MODES.ADD
+   :pixi.object.blend-mode/multiply PIXI/BLEND_MODES.MULTIPLY
+   :pixi.object.blend-mode/screen   PIXI/BLEND_MODES.SCREEN})
 
 (def ^:private text-properties
   {:pixi.text.style/align "align"
@@ -114,7 +114,7 @@
 (defn- create-base-texture [texture]
   (let [source (-> texture :pixi.texture/source image)
         mode   (-> texture :pixi.texture/scale-mode scale-modes)]
-    (js/PIXI.BaseTexture. source mode)))
+    (PIXI/BaseTexture. source mode)))
 
 (defn- get-base-texture [texture]
   (let [key (base-texture-key texture)]
@@ -132,7 +132,7 @@
 (def texture-cache (atom {}))
 
 (defn- create-texture [texture]
-  (js/PIXI.Texture.
+  (PIXI/Texture.
    (get-base-texture texture)
    (some-> texture :pixi.texture/frame rectangle)
    (some-> texture :pixi.texture/crop rectangle)
@@ -148,21 +148,21 @@
 (defn- create-render-texture [texture]
   (let [mode  (-> texture :pixi.texture/scale-mode scale-modes)
         [w h] (:pixi.render-texture/size texture)]
-    (.create js/PIXI.RenderTexture w h mode)))
+    (.create PIXI/RenderTexture w h mode)))
 
 (defmulti draw-shape! (fn [_ v] (v :pixi.shape/type)))
 
-(defmethod draw-shape! :pixi.shape.type/circle 
+(defmethod draw-shape! :pixi.shape.type/circle
   [graphics {[x y]  :pixi.shape/position
              radius :pixi.circle/radius}]
   (.drawCircle graphics x y radius))
 
-(defmethod draw-shape! :pixi.shape.type/ellipse 
+(defmethod draw-shape! :pixi.shape.type/ellipse
   [graphics {[x y]               :pixi.shape/position
              [x-radius y-radius] :pixi.ellipse/radius}]
   (.drawEllipse graphics x y x-radius y-radius))
 
-(defmethod draw-shape! :pixi.shape.type/polygon 
+(defmethod draw-shape! :pixi.shape.type/polygon
   [graphics {path :pixi.polygon/path}]
   (.drawPolygon graphics (clj->js path)))
 
@@ -178,7 +178,7 @@
   (.drawRoundedRect graphics x y width height radius))
 
 (defn- create-filter [filter]
-  (js/PIXI.Filter.
+  (PIXI/Filter.
    (:pixi.filter/vertex filter)
    (:pixi.filter/fragment filter)
    (clj->js (:pixi.filter/uniforms filter))))
@@ -211,22 +211,22 @@
 (defmulti create-object :pixi.object/type)
 
 (defmethod create-object :pixi.object.type/sprite [_]
-  {:val {}, :obj (js/PIXI.Sprite.)})
+  {:val {}, :obj (PIXI/Sprite.)})
 
 (defmethod create-object :pixi.object.type/movie-clip
   [{:keys [pixi.movie-clip/frames pixi.movie-clip/paused?]}]
-  (let [movie-clip (js/PIXI.extras.MovieClip. (create-frame-array frames))]
+  (let [movie-clip (PIXI/extras.MovieClip. (create-frame-array frames))]
     (when-not paused? (.play movie-clip))
     {:val {}, :obj movie-clip}))
 
 (defmethod create-object :pixi.object.type/container [_]
-  {:val {}, :obj (js/PIXI.Container.)})
+  {:val {}, :obj (PIXI/Container.)})
 
 (defmethod create-object :pixi.object.type/graphics [_]
-  {:val {}, :obj (js/PIXI.Graphics.)})
+  {:val {}, :obj (PIXI/Graphics.)})
 
 (defmethod create-object :pixi.object.type/text [_]
-  {:val {}, :obj (js/PIXI.Text.)})
+  {:val {}, :obj (PIXI/Text.)})
 
 (defmulti create
   (fn [attr value] attr))
@@ -234,7 +234,7 @@
 (defmethod create :pixi/renderer
   [_ {[w h] :pixi.renderer/size, transparent? :pixi.renderer/transparent? :as options}]
   {:val (select-keys options [:pixi.renderer/size :pixi.renderer/transparent?])
-   :obj (js/PIXI.autoDetectRenderer w h #js {:transparent transparent?})})
+   :obj (PIXI/autoDetectRenderer w h #js {:transparent transparent?})})
 
 (defmethod create :pixi/stage [_ value]
   (create-object value))
@@ -255,7 +255,7 @@
   {:val value, :obj #js {}})
 
 (defmethod create :pixi.text/style [_ value]
-  {:val {}, :obj (js/PIXI.TextStyle.)})
+  {:val {}, :obj (PIXI/TextStyle.)})
 
 (defmethod create :pixi.object/filters [_ value]
   {:val value, :obj (create-filter value)})
@@ -268,7 +268,7 @@
   (set! (.-alpha object) (or alpha 1.0)))
 
 (defmethod update-prop! :pixi.object/blend-mode [object _ _ mode]
-  (set! (.-blendMode object) (blend-modes mode js/PIXI.BLEND_MODES.NORMAL)))
+  (set! (.-blendMode object) (blend-modes mode PIXI/BLEND_MODES.NORMAL)))
 
 (defmethod update-prop! :pixi.object/position [object _ _ [x y]]
   (set! (-> object .-position .-x) x)
@@ -317,7 +317,7 @@
        (map #(build! index attr %))
        (replace-children container)))
 
-(defmethod update-prop! :pixi.graphics/shapes 
+(defmethod update-prop! :pixi.graphics/shapes
   [graphics-obj _ _ shapes]
   (.clear graphics-obj)
   (doseq [{:keys [pixi.shape/fill pixi.shape/line] :as shape}
@@ -326,7 +326,7 @@
                 (or (:pixi.line/width line) 0)
                 (:pixi.line/color line)
                 (or (:pixi.line/alpha line) 1))
-    (when fill 
+    (when fill
       (.beginFill graphics-obj
                   (:pixi.fill/color fill)
                   (or (:pixi.fill/alpha fill) 1)))
@@ -353,7 +353,7 @@
   (set! (.-texture sprite) (build! index attr texture)))
 
 (defmethod update-prop! :pixi.movie-clip/paused? [movie-clip _ _ paused?]
-  (set! (.-impiPaused movie-clip) paused?)
+  (goog.object/set movie-clip "impiPaused" paused?)
   (cond
     (and paused? (.-playing movie-clip))
     (.stop movie-clip)
@@ -362,7 +362,7 @@
 
 (defmethod update-prop! :pixi.movie-clip/loop? [movie-clip _ _ loop?]
   (set! (.-loop movie-clip) loop?)
-  (when (and loop? (not (.-playing movie-clip)) (not (.-impiPaused movie-clip)))
+  (when (and loop? (not (.-playing movie-clip)) (not (goog.object/get movie-clip "impiPaused")))
     (.play movie-clip)))
 
 (defmethod update-prop! :pixi.movie-clip/animation-speed [movie-clip _ _ speed]
@@ -476,3 +476,6 @@
     (let [view (.-view renderer)]
       (when-let [parent (.-parentNode view)]
         (.removeChild parent view)))))
+
+(defn init []
+  (js/console.log "init"))

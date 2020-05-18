@@ -1,0 +1,11 @@
+{
+    "name": "impi",
+    "version": "0.0.1",
+    "private": true,
+    "devDependencies": {
+        "shadow-cljs": "2.8.110"
+    },
+    "dependencies": {
+        "pixi.js": "5.2.4"
+    }
+}
