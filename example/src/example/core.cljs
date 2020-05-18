@@ -138,11 +138,11 @@
      :pixi.object/type :pixi.object.type/text
      :pixi.object/position [100 290]
      :pixi.text/text "Hello World!"
-     :pixi.text/style 
+     :pixi.text/style
      {:pixi.text.style/align "center"
       :pixi.text.style/break-words true
       :pixi.text.style/drop-shadow true
-      :pixi.text.style/drop-shadow-angle (/ Math.PI 6)
+      :pixi.text.style/drop-shadow-angle (/ js/Math.PI 6)
       :pixi.text.style/drop-shadow-blur 0
       :pixi.text.style/drop-shadow-color 0x222222
       :pixi.text.style/drop-shadow-distance 5
