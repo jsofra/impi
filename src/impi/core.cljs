@@ -215,7 +215,7 @@
 
 (defmethod create-object :pixi.object.type/movie-clip
   [{:keys [pixi.movie-clip/frames pixi.movie-clip/paused?]}]
-  (let [movie-clip (PIXI/extras.MovieClip. (create-frame-array frames))]
+  (let [movie-clip (PIXI/extras.AnimatedSprite. (create-frame-array frames))]
     (when-not paused? (.play movie-clip))
     {:val {}, :obj movie-clip}))
 
