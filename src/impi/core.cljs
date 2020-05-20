@@ -1,5 +1,6 @@
 (ns impi.core
-  (:require ["pixi.js" :as PIXI]))
+  (:require ["pixi.js" :as PIXI]
+            [cljs.core.async :as async]))
 
 (defn- update-count [child f]
   (goog.object/set child "impiCount" (f (goog.object/get child "impiCount"))))
@@ -55,12 +56,18 @@
       (run! #(set-parent % container) (.-children container)))))
 
 (def listeners (atom {}))
+(def events-chans (atom {}))
 
 (defn- replace-listener [object event index [key & args]]
-  (let [listener ((@listeners (first index)) key)]
-    (doto object
+  (let [events-chan ((@events-chans (first index)) key)
+        listener    ((@listeners (first index)) key)]
+    (doto
       (.removeAllListeners event)
-      (.on event #(apply listener % args)))))
+      (.on event (if events-chan
+                   #(async/put! events-chan {:type :event
+                                             :key  key
+                                             :args args})
+                   #(apply listener % args))))))
 
 (defn- rectangle [[x y w h]]
   (PIXI/Rectangle. x y w h))
@@ -448,6 +455,9 @@
 (defn- build-listeners! [key scene]
   (swap! listeners assoc key (:pixi/listeners scene {})))
 
+(defn- build-events-chans! [key scene]
+  (swap! events-chans assoc key (:impi/events-chan scene {})))
+
 (defn- build-renderer! [key scene]
   (when-let [renderer (:pixi/renderer scene)]
     (build! [key] :pixi/renderer renderer)))
@@ -466,6 +476,7 @@
 
 (defn mount [key scene element]
   (build-listeners! key scene)
+  (build-events-chans! key scene)
   (when-let [renderer (build-renderer! key scene)]
     (mount-view renderer element)
     (when-let [stage (build-stage! renderer key scene)]
