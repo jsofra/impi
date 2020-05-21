@@ -61,7 +61,6 @@
 (defn- replace-listener [object event index [key & args]]
   (let [events-chan (@events-chans (first index))
         listener    ((@listeners (first index)) key)]
-    (js/console.log "RL" [object event index [key args]])
     (doto object
       (.removeAllListeners event)
       (.on event (if events-chan
