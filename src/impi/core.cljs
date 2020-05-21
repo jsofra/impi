@@ -66,7 +66,7 @@
       (.on event (if events-chan
                    #(async/put! events-chan {:type :event
                                              :key  key
-                                             :args args})
+                                             :args (assoc args :event %)})
                    #(apply listener % args))))))
 
 (defn- rectangle [[x y w h]]
