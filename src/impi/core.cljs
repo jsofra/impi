@@ -64,9 +64,10 @@
     (doto object
       (.removeAllListeners event)
       (.on event (if events-chan
-                   #(async/put! events-chan {:type :event
-                                             :key  key
-                                             :args (assoc args :event %)})
+                   #(async/put! events-chan {:type  :event
+                                             :key   key
+                                             :args  args
+                                             :event %})
                    #(apply listener % args))))))
 
 (defn- rectangle [[x y w h]]
