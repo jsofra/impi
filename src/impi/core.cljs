@@ -241,7 +241,7 @@
 (defmethod create :pixi/renderer
   [_ {[w h] :pixi.renderer/size, transparent? :pixi.renderer/transparent? :as options}]
   {:val (select-keys options [:pixi.renderer/size :pixi.renderer/transparent?])
-   :obj (PIXI/autoDetectRenderer w h #js {:transparent transparent?})})
+   :obj (PIXI/autoDetectRenderer #js {:width w :height h :transparent transparent?})})
 
 (defmethod create :pixi/stage [_ value]
   (create-object value))
