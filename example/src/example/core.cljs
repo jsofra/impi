@@ -42,7 +42,7 @@
    :pixi.renderer/background-color 0xbbbbbb
    :pixi.renderer/transparent?     false}
   :pixi/listeners
-  {:click      (fn [_ id] (prn :click id))
+  {:click      (fn [_ {:keys [id]}] (prn :click id))
    :mouse-down (fn [_] (prn :mouse-down))
    :mouse-up   (fn [_] (prn :mouse-up))
    :mouse-over (fn [_] (prn :mouse-over))
@@ -57,7 +57,7 @@
      :pixi.object/type :pixi.object.type/container
      :pixi.object/interactive? true
      :pixi.object/contains-point (constantly true)
-     :pixi.event/click [:click :background]}
+     :pixi.event/click [:click {:id :background}]}
     :b
     {:impi/key :performance
      :pixi.object/type :pixi.object.type/container
@@ -75,7 +75,7 @@
      :pixi.object/position     [100 100]
      :pixi.object/scale        [5 5]
      :pixi.object/interactive? true
-     :pixi.event/click         [:click :bunny2]
+     :pixi.event/click         [:click {:id :bunny2}]
      :pixi.event/mouse-down    [:mouse-down]
      :pixi.event/mouse-up      [:mouse-up]
      :pixi.event/mouse-over    [:mouse-over]

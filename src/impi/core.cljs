@@ -58,7 +58,7 @@
 (def listeners (atom {}))
 (def events-chans (atom {}))
 
-(defn- replace-listener [object event index [key & args]]
+(defn- replace-listener [object event index [key args]]
   (let [events-chan (@events-chans (first index))
         listener    ((@listeners (first index)) key)]
     (doto object
