@@ -61,7 +61,7 @@
 (defn- replace-listener [object event index [key & args]]
   (let [events-chan (@events-chans (first index))
         listener    ((@listeners (first index)) key)]
-    (doto
+    (doto object
       (.removeAllListeners event)
       (.on event (if events-chan
                    #(async/put! events-chan {:type :event
